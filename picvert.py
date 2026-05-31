@@ -5,15 +5,22 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageTk
 
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+    HEIC_AVAILABLE = True
+except ImportError:
+    HEIC_AVAILABLE = False
+
 DND_AVAILABLE = False
 
 SUPPORTED_INPUTS = [
     ("All/recovered files", "*"),
-    ("Image files", "*.png *.PNG *.jpg *.JPG *.jpeg *.JPEG *.jfif *.JFIF *.webp *.WEBP *.bmp *.BMP *.tiff *.TIFF *.tif *.TIF *.gif *.GIF *.ico *.ICO"),
+    ("Image files", "*.png *.PNG *.jpg *.JPG *.jpeg *.JPEG *.jfif *.JFIF *.webp *.WEBP *.bmp *.BMP *.tiff *.TIFF *.tif *.TIF *.gif *.GIF *.ico *.ICO *.heic *.HEIC *.heif *.HEIF"),
     ("All files", "*.*")
 ]
 OUTPUT_FORMATS = ["Auto", "PNG", "JPEG", "WEBP", "BMP", "TIFF", "GIF", "ICO"]
-VALID_EXTS = {".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif", ".gif", ".ico"}
+VALID_EXTS = {".png", ".jpg", ".jpeg", ".jfif", ".webp", ".bmp", ".tiff", ".tif", ".gif", ".ico", ".heic", ".heif"}
 FORMAT_EXTS = {
     "BMP": "bmp",
     "GIF": "gif",
@@ -196,7 +203,6 @@ class ImageConverterApp:
         ttk.Label(fmt_row, text="Output Format:", style="Card.TLabel", width=18).pack(side="left")
         ttk.Combobox(fmt_row, textvariable=self.output_format, values=OUTPUT_FORMATS, state="readonly", width=16, style="Dark.TCombobox").pack(side="left")
         ttk.Label(fmt_row, text="(Auto = detect source format)", style="Muted.TLabel").pack(side="left", padx=(10, 0))
-
         quality_row = ttk.Frame(settings_frame, style="Card.TFrame")
         quality_row.pack(fill="x", pady=6)
         ttk.Label(quality_row, text="Quality:", style="Card.TLabel", width=18).pack(side="left")
@@ -268,6 +274,7 @@ class ImageConverterApp:
             return
         added = 0
         skipped = 0
+        heic_skipped = False
         for file in files:
             if os.path.isfile(file) and file not in self.selected_files:
                 if self.is_supported_image(file):
@@ -275,13 +282,26 @@ class ImageConverterApp:
                     self.file_listbox.insert(tk.END, os.path.basename(file))
                     added += 1
                 else:
+                    ext = os.path.splitext(file.lower())[1]
+                    if ext in (".heic", ".heif") and not HEIC_AVAILABLE:
+                        heic_skipped = True
                     skipped += 1
         self.update_file_count()
         self.refresh_thumbnails()
         status = f"{prefix}: {added} image(s)"
         if skipped:
-            status += f" | Skipped non-images: {skipped}"
+            status += f" | Skipped: {skipped}"
         self.status_text.set(status)
+        
+        if heic_skipped:
+            messagebox.showwarning(
+                "HEIC Decoder Required",
+                "Some selected files are in HEIC/HEIF format.\n\n"
+                "To load and convert HEIC images, please run this command in your terminal:\n"
+                "pip install pillow-heif\n\n"
+                "Then restart the application to activate HEIC support!"
+            )
+            
         if self.file_listbox.size() > 0 and not self.file_listbox.curselection():
             self.file_listbox.selection_set(0)
             self.show_preview()

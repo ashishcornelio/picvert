@@ -5,7 +5,7 @@ Picvert is a simple desktop image converter built with Python, Tkinter, and Pill
 ## Features
 
 - Batch convert multiple images at once
-- Supports `PNG`, `JPEG`, `WEBP`, `BMP`, `TIFF`, `GIF`, and `ICO`
+- Supports `PNG`, `JPEG`, `WEBP`, `BMP`, `TIFF`, `GIF`, `ICO`, and `HEIC`/`HEIF` (requires `pillow-heif`)
 - Can scan extensionless/recovered files and convert the ones Pillow detects as images
 - Preview selected images inside the app
 - Resize images before export
@@ -18,6 +18,7 @@ Picvert is a simple desktop image converter built with Python, Tkinter, and Pill
 
 - Python 3.10+ recommended
 - `Pillow`
+- `pillow-heif` (for HEIC/HEIF support)
 
 ## Project Files
 
@@ -32,7 +33,7 @@ Picvert is a simple desktop image converter built with Python, Tkinter, and Pill
 Open PowerShell in the project folder and run:
 
 ```powershell
-pip install pillow pyinstaller
+pip install pillow pyinstaller pillow-heif
 ```
 
 ## Run the App

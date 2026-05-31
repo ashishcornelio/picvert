@@ -1,0 +1,13 @@
+# Ignore everything by default
+*
+
+# Allow Git to traverse directories so negation rules can be checked
+!*/
+
+# Do not ignore .gitignore itself
+!.gitignore
+
+# Unignore the three files you want to keep and push to GitHub
+!app.ico
+!picvert.py
+!README.md
